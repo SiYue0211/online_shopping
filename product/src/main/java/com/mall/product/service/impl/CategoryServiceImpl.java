@@ -2,7 +2,9 @@ package com.mall.product.service.impl;
 
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -26,6 +28,36 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         );
 
         return new PageUtils(page);
+    }
+
+    public List<CategoryEntity> listWithTree() {
+        // 1. Retrieve all categories
+        List<CategoryEntity> categories = baseMapper.selectList(null);
+
+        // 2. Find all the top-level categories
+        List<CategoryEntity> toplevelMenu = categories.stream().filter((entity) -> {
+            return entity.getParentCid() == 0;
+        }).map((menu) -> {
+            menu.setChildren(getChildren(menu, categories));
+            return menu;
+        }).sorted((menu1, menu2) -> {
+            return menu1.getSort() - menu2.getSort();
+        }).collect(Collectors.toList());
+
+        return toplevelMenu;
+    }
+
+    private List<CategoryEntity> getChildren(CategoryEntity toplevel, List<CategoryEntity> all) {
+        List<CategoryEntity> children = all.stream().filter(entity -> {
+            return entity.getParentCid() == toplevel.getCatId();
+        }).map(entity -> {
+            entity.setChildren(getChildren(entity, all));
+            return entity;
+        }).sorted((menu1, menu2) -> {
+            return menu1.getSort() - menu2.getSort();
+        }).collect(Collectors.toList());
+
+        return children;
     }
 
 }
