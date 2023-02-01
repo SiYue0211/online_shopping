@@ -2,6 +2,8 @@ package com.mall.product.service.impl;
 
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -66,4 +68,21 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return children;
     }
 
+    @Override
+    public Long[] findCatalogPath(Long catalogId) {
+        List<Long> paths = new ArrayList<>();
+        findParentPath(catalogId, paths);
+        Collections.reverse(paths);
+
+        return (Long[])paths.toArray(new Long[paths.size()]);
+    }
+
+    private void findParentPath(Long catalogId, List<Long> paths) {
+        paths.add(catalogId);
+        CategoryEntity byId = this.getById(catalogId);
+
+        if (byId.getParentCid() != 0) {
+            findParentPath(byId.getParentCid(), paths);
+        }
+    }
 }

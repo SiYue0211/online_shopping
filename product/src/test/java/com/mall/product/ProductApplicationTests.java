@@ -3,6 +3,8 @@ package com.mall.product;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.mall.product.entity.BrandEntity;
 import com.mall.product.service.BrandService;
+import com.mall.product.service.CategoryService;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.runner.RunWith;
 import org.junit.Test;
 import org.mybatis.spring.annotation.MapperScan;
@@ -11,13 +13,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.File;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class ProductApplicationTests {
     @Autowired
     BrandService brandService;
+
+    @Autowired
+    CategoryService categoryService;
 
     @Test
     public void contextLoads() {
@@ -36,5 +45,12 @@ public class ProductApplicationTests {
             System.out.println(item);
         });
     }
+
+    @Test
+    public void testFindPath() {
+        Long[] paths  = categoryService.findCatalogPath(819L);
+        log.info("The path from root: {}", Arrays.asList(paths));
+    }
+
 
 }
