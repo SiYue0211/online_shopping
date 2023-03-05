@@ -29,7 +29,7 @@ public class SkuInfoEntity implements Serializable {
      */
     private Long spuId;
     /**
-     * sku����
+     * sku name
      */
     private String skuName;
     /**

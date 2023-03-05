@@ -52,7 +52,7 @@ public class AttrEntity implements Serializable {
     /**
      *
      */
-    private Long catelogId;
+    private Long catalogId;
     /**
      * Show description or not 0: Dont show, 1: Show
      */

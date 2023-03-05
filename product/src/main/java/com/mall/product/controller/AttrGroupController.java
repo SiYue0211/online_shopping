@@ -1,15 +1,19 @@
 package com.mall.product.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.List;
 
+import com.mall.product.entity.AttrAttrgroupRelationEntity;
+import com.mall.product.entity.AttrEntity;
+import com.mall.product.service.AttrAttrgroupRelationService;
+import com.mall.product.service.AttrService;
 import com.mall.product.service.CategoryService;
+import com.mall.product.vo.AttrGroupRelationVo;
+import com.mall.product.vo.AttrGroupWithAttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.mall.product.entity.AttrGroupEntity;
 import com.mall.product.service.AttrGroupService;
@@ -33,18 +37,23 @@ public class AttrGroupController {
     @Autowired
     private CategoryService categoryService;
 
+    @Autowired
+    private AttrService attrService;
+
+    @Autowired
+    private AttrAttrgroupRelationService attrgroupRelationService;
+
     /**
      * 列表
      */
-    @RequestMapping("/list/{categoryId}")
+    @RequestMapping("/list/{catalogId}")
 //    @RequiresPermissions("product:attrgroup:list")
     public R list(@RequestParam Map<String, Object> params,
-                  @PathVariable Long categoryId) {
-        PageUtils page = attrGroupService.queryPage(params, categoryId);
+                  @PathVariable Long catalogId) {
+        PageUtils page = attrGroupService.queryPage(params, catalogId);
 
         return R.ok().put("page", page);
     }
-
 
     /**
      * 信息
@@ -52,7 +61,7 @@ public class AttrGroupController {
     @RequestMapping("/info/{attrGroupId}")
     public R info(@PathVariable("attrGroupId") Long attrGroupId) {
         AttrGroupEntity attrGroup = attrGroupService.getById(attrGroupId);
-        Long catalogId = attrGroup.getCatelogId();
+        Long catalogId = attrGroup.getCatalogId();
         Long[] catalogPath = categoryService.findCatalogPath(catalogId);
         attrGroup.setCatalogPath(catalogPath);
         return R.ok().put("attrGroup", attrGroup);
@@ -89,6 +98,61 @@ public class AttrGroupController {
         attrGroupService.removeByIds(Arrays.asList(attrGroupIds));
 
         return R.ok();
+    }
+
+    /**
+     *
+     * API example: /product/attrgroup/attr/relation/delete
+     */
+    @PostMapping("/attr/relation/delete")
+    public R deleteRelation(@RequestBody AttrGroupRelationVo[] vos) {
+        attrService.deleteRelation(vos);
+
+        return R.ok();
+    }
+
+    /***
+     * Build the relation between different attributes
+     * example: // api/product/attrgroup/1/attr/relation?t=1675878470391
+     * @return
+     */
+    @RequestMapping("/{groupId}/attr/relation")
+    public R attrRelation(@PathVariable Long groupId) {
+        ArrayList<AttrEntity> entityList = attrService.getRelationAttr(groupId);
+
+        return R.ok().put("data", entityList.toArray());
+    }
+
+    /**
+     *
+     * API example: /product/attrgroup/{attrgroupId}/noattr/relation
+     */
+    @RequestMapping("/{groupId}/noattr/relation")
+    public R attrNoRelation(@PathVariable Long groupId,
+                            @RequestParam Map<String, Object> params) {
+        PageUtils page = attrService.getNoRelationAttr(params, groupId);
+
+        return R.ok().put("page", page);
+    }
+
+    /**
+     *
+     * API example: /product/attrgroup/attr/relation
+     */
+    @RequestMapping("/attr/relation")
+    public R addAttrRelation(@RequestBody ArrayList<AttrAttrgroupRelationEntity> relationEntity) {
+        attrgroupRelationService.saveBatch(relationEntity);
+
+        return R.ok();
+    }
+
+    /**
+     * API example: /product/attrgroup/{catalogId}/withattr
+     */
+    @RequestMapping("/{catalogId}/withattr")
+    public R getAttrgroupWithAttr(@PathVariable Long catalogId) {
+        List<AttrGroupWithAttrVo> vos = attrGroupService.getAttrGroupWithAttrsByCatalogId(catalogId);
+        return R.ok().put("data", vos);
     }
 
 }

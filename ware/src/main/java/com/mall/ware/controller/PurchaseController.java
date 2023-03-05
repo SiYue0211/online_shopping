@@ -2,13 +2,12 @@ package com.mall.ware.controller;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.List;
 
+import com.mall.ware.vo.MergeVo;
+import com.mall.ware.vo.PurchaseDoneVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.mall.ware.entity.PurchaseEntity;
 import com.mall.ware.service.PurchaseService;
@@ -33,6 +32,16 @@ public class PurchaseController {
     @RequestMapping("/list")
     public R list(@RequestParam Map<String, Object> params) {
         PageUtils page = purchaseService.queryPage(params);
+
+        return R.ok().put("page", page);
+    }
+
+    /**
+     * API: /ware/purchase/unreceive/list
+     */
+    @RequestMapping("/unreceive/list")
+    public R unReceivedList(@RequestParam Map<String, Object> params) {
+        PageUtils page = purchaseService.queryPageUnreceived(params);
 
         return R.ok().put("page", page);
     }
@@ -78,4 +87,25 @@ public class PurchaseController {
         return R.ok();
     }
 
+    @PostMapping("/merge")
+    public R merge(@RequestBody MergeVo mergeVo) {
+        purchaseService.mergePurchase(mergeVo);
+
+        return R.ok();
+    }
+
+    /**
+     * ware/purchase/received
+     */
+    @PostMapping("/received")
+    public R received(@RequestBody List<Long> ids) {
+        purchaseService.received(ids);
+        return R.ok();
+    }
+
+    @PostMapping("/done")
+    public R done(@RequestBody PurchaseDoneVo doneVo) {
+        purchaseService.done(doneVo);
+        return R.ok();
+    }
 }
